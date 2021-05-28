@@ -1,42 +1,64 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 using System;
 using ZXing;
 using ZXing.QrCode;
+using TMPro;
 
 public class ReadQR : MonoBehaviour
 {
-    private WebCamTexture camTexture;
+    private WebCamTexture m_webCamTexture;
+
+    public RawImage m_QRCode;
+
     private Rect screenRect;
+
+    public TMP_Text m_TextInQR;
 
     void Start()
     {
-        screenRect = new Rect(0, 0, Screen.width, Screen.height);
-        camTexture = new WebCamTexture();
-        camTexture.requestedHeight = Screen.height;
-        camTexture.requestedWidth = Screen.width;
-        if (camTexture != null)
-        {
-            camTexture.Play();
-        }
+        screenRect = m_QRCode.rectTransform.rect;
+        m_webCamTexture = new WebCamTexture();
+
+        m_QRCode.texture = m_webCamTexture;
+
+        StartCoroutine(ReadQRCode());
     }
 
-    void OnGUI()
+    IEnumerator ReadQRCode()
     {
-        // drawing the camera on screen
-        GUI.DrawTexture(screenRect, camTexture, ScaleMode.ScaleToFit);
-        // do the reading — you might want to attempt to read less often than you draw on the screen for performance sake
         try
         {
+            if (!m_webCamTexture.isPlaying)
+            {
+                m_webCamTexture.requestedHeight = (int)m_QRCode.rectTransform.rect.height;
+                m_webCamTexture.requestedWidth = (int)m_QRCode.rectTransform.rect.height;
+
+                if (m_webCamTexture != null)
+                {
+                    m_webCamTexture.Play();
+                }
+            }
+
             IBarcodeReader barcodeReader = new BarcodeReader();
-            // decode the current frame
-            var result = barcodeReader.Decode(camTexture.GetPixels32(), camTexture.width, camTexture.height);
+
+            // Decode the current frame
+            var result = barcodeReader.Decode(m_webCamTexture.GetPixels32(), m_webCamTexture.width, m_webCamTexture.height);
+
             if (result != null)
             {
                 Debug.Log("DECODED TEXT FROM QR: " + result.Text);
+                m_TextInQR.text = result.Text;
             }
         }
-        catch (Exception ex) { Debug.LogWarning(ex.Message); }
+        catch (Exception ex)
+        {
+            Debug.LogWarning(ex.Message);
+        }
+
+        yield return new WaitForSeconds(0.1f);
+        StartCoroutine(ReadQRCode());
     }
 }

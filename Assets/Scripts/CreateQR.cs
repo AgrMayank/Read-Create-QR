@@ -49,8 +49,8 @@ public class CreateQR : MonoBehaviour
     public void CreateQRCode()
     {
         Texture2D myQR = generateQR(m_TextToEncode);
-        m_QRCode.texture = myQR;
 
+        m_QRCode.texture = myQR;
         m_TextInQR.text = "<u>Text in QR:</u>\n\n" + m_TextToEncode;
     }
 }
