@@ -2,14 +2,19 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
-using System;
+using System.Drawing;
 using ZXing;
+using ZXing.QrCode.Internal;
+using ZXing.Rendering;
+using ZXing.Common;
 using ZXing.QrCode;
 using TMPro;
 
 public class CreateQR : MonoBehaviour
 {
     public string m_TextToEncode = "Write Your QR Code Message Here";
+
+    public Sprite m_ImageToAdd;
 
     public TMP_Text m_TextInQR;
 
@@ -22,14 +27,20 @@ public class CreateQR : MonoBehaviour
 
     private static Color32[] Encode(string textForEncoding, int width, int height)
     {
+        var encodeOptions = new QrCodeEncodingOptions
+        {
+            Height = height,
+            Width = width,
+            Margin = 0,
+            PureBarcode = false,
+        };
+
+        encodeOptions.Hints.Add(EncodeHintType.ERROR_CORRECTION, ErrorCorrectionLevel.H);
+
         var writer = new BarcodeWriter
         {
             Format = BarcodeFormat.QR_CODE,
-            Options = new QrCodeEncodingOptions
-            {
-                Height = height,
-                Width = width
-            }
+            Options = encodeOptions
         };
 
         return writer.Write(textForEncoding);
