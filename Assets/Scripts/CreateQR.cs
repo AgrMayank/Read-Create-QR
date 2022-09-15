@@ -14,8 +14,6 @@ public class CreateQR : MonoBehaviour
 {
     public string m_TextToEncode = "Write Your QR Code Message Here";
 
-    public Sprite m_ImageToAdd;
-
     public TMP_Text m_TextInQR;
 
     public RawImage m_QRCode;
@@ -31,8 +29,8 @@ public class CreateQR : MonoBehaviour
         {
             Height = height,
             Width = width,
-            Margin = 0,
-            PureBarcode = false,
+            Margin = 1,
+            PureBarcode = false
         };
 
         encodeOptions.Hints.Add(EncodeHintType.ERROR_CORRECTION, ErrorCorrectionLevel.H);

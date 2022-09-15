@@ -6,59 +6,68 @@ using System;
 using ZXing;
 using ZXing.QrCode;
 using TMPro;
+using UnityEngine.XR.ARFoundation;
+using UnityEngine.XR.ARSubsystems;
 
 public class ReadQR : MonoBehaviour
 {
-    private WebCamTexture m_webCamTexture;
-
-    public RawImage m_QRCode;
-
-    private Rect screenRect;
-
     public TMP_Text m_TextInQR;
 
-    void Start()
+    [SerializeField]
+    ARCameraManager m_CameraManager;
+
+    public ARCameraManager cameraManager
     {
-        screenRect = m_QRCode.rectTransform.rect;
-        m_webCamTexture = new WebCamTexture();
-
-        m_QRCode.texture = m_webCamTexture;
-
-        StartCoroutine(ReadQRCode());
+        get => m_CameraManager;
+        set => m_CameraManager = value;
     }
 
     IEnumerator ReadQRCode()
     {
-        try
+        if (!cameraManager.TryAcquireLatestCpuImage(out XRCpuImage cpuImage))
         {
-            if (!m_webCamTexture.isPlaying)
-            {
-                m_webCamTexture.requestedHeight = (int)m_QRCode.rectTransform.rect.height;
-                m_webCamTexture.requestedWidth = (int)m_QRCode.rectTransform.rect.height;
-
-                if (m_webCamTexture != null)
-                {
-                    m_webCamTexture.Play();
-                }
-            }
-
-            IBarcodeReader barcodeReader = new BarcodeReader();
-
-            // Decode the current frame
-            var result = barcodeReader.Decode(m_webCamTexture.GetPixels32(), m_webCamTexture.width, m_webCamTexture.height);
-
-            if (result != null)
-            {
-                Debug.Log("DECODED TEXT FROM QR: " + result.Text);
-                m_TextInQR.text = result.Text;
-            }
-        }
-        catch (Exception ex)
-        {
-            Debug.LogWarning(ex.Message);
+            yield return null;
         }
 
-        yield return new WaitForSeconds(0.1f);
-        StartCoroutine(ReadQRCode());
+        var texture = new Texture2D(cpuImage.width, cpuImage.height, TextureFormat.RGBA32, false);
+
+        // For display, we need to mirror about the vertical access.
+        var conversionParams = new XRCpuImage.ConversionParams(cpuImage, TextureFormat.RGBA32, XRCpuImage.Transformation.MirrorY);
+
+        // Get the Texture2D's underlying pixel buffer.
+        var rawTextureData = texture.GetRawTextureData<byte>();
+
+        // Make sure the destination buffer is large enough to hold the converted data (they should be the same size)
+        Debug.Assert(rawTextureData.Length == cpuImage.GetConvertedDataSize(conversionParams.outputDimensions, conversionParams.outputFormat),
+            "The Texture2D is not the same size as the converted data.");
+
+        // Perform the conversion.
+        cpuImage.Convert(conversionParams, rawTextureData);
+
+        // "Apply" the new pixel data to the Texture2D.
+        texture.Apply();
+
+        cpuImage.Dispose();
+
+        IBarcodeReader barcodeReader = new BarcodeReader();
+
+        // Decode the current frame
+        var result = barcodeReader.Decode(texture.GetPixels32(), texture.width, texture.height);
+
+        if (result != null)
+        {
+            Debug.Log("DECODED TEXT FROM QR: " + result.Text);
+            m_TextInQR.text = result.Text;
+
+            /* TODO: Call function to check QR Contents
+                If - Valid map code, then Start Localization
+                Else - Call this coroutine again
+            */
+        }
+        else
+        {
+            yield return new WaitForSeconds(0.5f);
+            StartCoroutine(ReadQRCode());
+        }
     }
 }

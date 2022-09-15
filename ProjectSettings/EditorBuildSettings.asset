@@ -6,12 +6,16 @@ EditorBuildSettings:
   serializedVersion: 2
   m_Scenes:
   - enabled: 1
-    path: Assets/Scenes/01 Menu.unity
-    guid: 9997af18cf5b9f04ab09668ac3b53a22
-  - enabled: 1
-    path: Assets/Scenes/02 Create QR.unity
-    guid: dde1ebd348db752478fd6f1050f51444
-  - enabled: 1
-    path: Assets/Scenes/03 Read QR.unity
-    guid: 9fc0d4010bbf28b4594072e72b8655ab
-  m_configObjects: {}
+    path: Assets/Scenes/03 Read QR 1.unity
+    guid: 8d514db6c276cea43b3ba78a4938edd5
+  m_configObjects:
+    UnityEditor.XR.ARCore.ARCoreSettings: {fileID: 11400000, guid: 437bf767d6a6ac140a6402a058c47341,
+      type: 2}
+    UnityEditor.XR.ARKit.ARKitSettings: {fileID: 11400000, guid: bf06830046daca745b7475f817d5486c,
+      type: 2}
+    com.unity.xr.magicleap.magic_leap_settings: {fileID: 11400000, guid: 1448097840b1ec44a993baae2f0f0c93,
+      type: 2}
+    com.unity.xr.management.loader_settings: {fileID: 11400000, guid: 5f484b3c2540bd141b8b620e435f831d,
+      type: 2}
+    com.unity.xr.openxr.settings4: {fileID: 11400000, guid: 9b1a38416827ecd408e770ab0bc746ff,
+      type: 2}
